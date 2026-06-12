@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memoria - Nossas Recordações</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+   
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- ÁUDIO DE FUNDO (Música Instrumental Suave) -->
+    <audio id="bg-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- TELA DE DESBLOQUEIO (LOGIN POR DATA) -->
+    <div id="unlock-screen" class="fixed inset-0 z-50 bg-[#0b0c10] flex flex-col items-center justify-center p-4 transition-all duration-700 ease-in-out">
+        <div class="max-w-md w-full text-center space-y-8 bg-[#151a22] p-6 md:p-8 rounded-2xl border border-pink-500/20 shadow-2xl shadow-pink-500/5">
+            <div class="flex justify-center">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-pink-500/10 rounded-full flex items-center justify-center animate-pulse">
+                    <i data-lucide="heart" class="w-8 h-8 md:w-10 md:h-10 text-pink-500 fill-pink-500"></i>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <h1 class="text-2xl md:text-3xl font-bold text-white serif-font tracking-wide">Seja bem-vinda ao Memoria</h1>
+                <p class="text-gray-400 text-xs md:text-sm">Informe quando tudo começou para desbloquear nossas melhores lembranças.</p>
+            </div>
+
+            <!-- Campo de Entrada da Data -->
+            <div class="space-y-4">
+                <div class="relative">
+                    <input type="text" id="start-date" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric"
+                        class="w-full bg-[#1f2833] text-center text-lg md:text-xl tracking-widest text-white border-2 border-gray-700 rounded-xl py-3 px-4 focus:outline-none focus:border-pink-500 transition-all placeholder-gray-500">
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
+                        <i data-lucide="calendar" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                
+                <p class="text-[11px] text-gray-500">Dica: Tente colocar a data certa <span class="text-pink-400 font-semibold">07/06/2025</span></p>
+                
+                <!-- Mensagem de erro customizada -->
+                <div id="error-message" class="hidden text-red-400 text-xs md:text-sm bg-red-950/20 py-2 rounded-lg border border-red-500/20">
+                    Data incorreta. Tente lembrar com carinho! ❤️
+                </div>
+
+                <button onclick="checkDate()" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm md:text-base font-semibold py-3.5 rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-pink-500/20">
+                    Entrar no nosso mundo
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- CONTEÚDO PRINCIPAL (INICIALMENTE OCULTO) -->
+    <div id="main-content" class="hidden opacity-0 transition-opacity duration-1000 flex-col min-h-screen">
+        
+        <!-- TOP BAR (Navegação Rápida e Player) -->
+        <header class="sticky top-0 z-40 bg-[#0b0c10]/95 backdrop-blur-md border-b border-gray-800/80 px-4 py-3 md:py-4">
+            <div class="max-w-5xl mx-auto flex flex-col gap-3">
+                
+                <!-- Logo e Player de Música -->
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="heart" class="text-pink-500 fill-pink-500 w-5 h-5 md:w-6 md:h-6 animate-pulse"></i>
+                        <span class="text-lg md:text-xl font-bold tracking-wide text-white serif-font">Memoria</span>
+                    </div>
+
+                    <!-- Player de Música Compacto e Responsivo com frase personalizada -->
+                    <div class="flex items-center gap-2 md:gap-3 bg-[#151a22] pl-3 pr-1 py-1 rounded-full border border-gray-800">
+                        <div class="flex flex-col text-left">
+                            <span class="text-[10px] md:text-xs text-pink-400 font-semibold leading-tight">Lembra desta música?</span>
+                            <span class="text-[8px] md:text-[9px] text-gray-500 uppercase tracking-widest font-bold">Clique para ouvir</span>
+                        </div>
+                        <button id="music-btn" onclick="toggleMusic()" class="p-2 bg-pink-500/10 text-pink-500 rounded-full hover:bg-pink-500/20 transition-all active:scale-90">
+                            <i id="music-icon" data-lucide="play" class="w-3.5 h-3.5 fill-pink-500"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Seletor de Mês (Navegação Inteligente / Responsiva) -->
+                <div class="flex flex-col gap-1.5 border-t border-gray-800/40 pt-2">
+                    
+                    <!-- MENU DESKTOP: Exibido em telas médias/grandes -->
+                    <div class="hidden md:flex flex-col gap-1.5 w-full">
+                        <div class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
+                            <i data-lucide="compass" class="w-3 h-3"></i>
+                            <span>Selecione o mês desejado:</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 w-full" id="month-nav-container-desktop">
+                            <!-- Gerado dinamicamente para desktop -->
+                        </div>
+                    </div>
+
+                    <!-- MENU DROPDOWN MOBILE: Exibido apenas em telas pequenas (Celulares) -->
+                    <div class="md:hidden relative w-full" id="mobile-dropdown-container">
+                        <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <i data-lucide="compass" class="w-3 h-3"></i>
+                            <span>Navegar para outro mês:</span>
+                        </div>
+                        
+                        <!-- Botão que abre/fecha o menu suspenso -->
+                        <button id="dropdown-trigger-btn" onclick="toggleDropdown()" class="w-full bg-[#151a22] border border-gray-800 text-gray-200 rounded-xl px-4 py-3 flex items-center justify-between text-xs font-semibold active:scale-[0.98] transition-all">
+                            <span class="flex items-center gap-2">
+                                <span class="w-2 h-2 bg-pink-500 rounded-full animate-ping"></span>
+                                <span id="dropdown-current-month" class="truncate max-w-[200px]">Selecionar Mês</span>
+                            </span>
+                            <i data-lucide="chevron-down" id="dropdown-arrow-icon" class="w-4 h-4 text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        
+                        <!-- Lista de opções suspensas -->
+                        <div id="dropdown-options" class="hidden absolute top-[110%] left-0 w-full bg-[#151a22] border border-gray-800 rounded-xl shadow-2xl z-50 py-2 max-h-64 overflow-y-auto divide-y divide-gray-800/30">
+                            <!-- Populado dinamicamente via JS -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </header>
+
+        <!-- CONTAINER PRINCIPAL -->
+        <main class="flex-grow max-w-2xl mx-auto w-full px-4 py-6 md:py-10 space-y-12">
+            
+            <!-- INTRODUÇÃO -->
+            <section class="text-center space-y-2 py-4 border-b border-gray-800/30">
+                <h2 class="text-2xl md:text-3xl font-bold text-white serif-font">Nossa História em Retratos</h2>
+                <p class="text-gray-400 text-xs md:text-sm max-w-md mx-auto leading-relaxed">
+                    Arraste para os lados nas fotos para navegar no celular, ou clique nas setas. Use o ícone de mosaico para ver tudo junto.
+                </p>
+            </section>
+
+            <!-- CONTAINER DOS CARROSSÉIS (12 meses) -->
+            <div id="months-container" class="space-y-16 md:space-y-24">
+                <!-- Os 12 carrosséis serão inseridos dinamicamente aqui -->
+            </div>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="border-t border-gray-800/80 bg-[#0d0f14] py-8 text-center text-xs text-gray-500 mt-12">
+            <div class="max-w-7xl mx-auto px-4 space-y-2">
+                <p class="serif-font text-white text-base font-semibold">Feito com todo amor do mundo ❤️</p>
+                <div class="flex justify-center items-center gap-2 text-[10px] text-gray-600">
+                    <span>Eduardo Medeiros</span>
+                    <span>•</span>
+                    <span>&copy; 2026 Todos os direitos reservados</span>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- MODAL PARA VER TODAS AS FOTOS DO MÊS (MOSAICO) -->
+    <div id="gallery-modal" class="hidden fixed inset-0 z-50 bg-[#050608]/95 backdrop-blur-md flex items-center justify-center p-3 md:p-4">
+        <div class="bg-[#151a22] border border-gray-800 rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto p-5 md:p-8 space-y-6 relative">
+            
+            <!-- Botão Fechar de toque fácil -->
+            <button onclick="closeGalleryModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors bg-gray-800/60 p-2.5 rounded-full active:scale-90">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Título do Mês no Modal -->
+            <div class="text-center space-y-1 pr-8">
+                <span id="modal-subtitle" class="text-[10px] uppercase tracking-widest text-pink-400 font-bold">Álbum Completo</span>
+                <h3 id="modal-title" class="text-xl md:text-2xl font-bold text-white serif-font">Mês 1</h3>
+            </div>
+
+            <!-- Grade de Fotos adaptável -->
+            <div id="modal-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                <!-- Fotos inseridas dinamicamente via JS -->
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
