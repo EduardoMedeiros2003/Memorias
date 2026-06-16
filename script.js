@@ -53,7 +53,7 @@ const natureImages = [
             const dateVal = dateInput.value;
             const errorMsg = document.getElementById('error-message');
             
-            if (dateVal === "07/07/2025" || dateVal === "07/07/25") {
+            if (dateVal === "00/00/0000" || dateVal === "07/07/25") {
                 if (errorMsg) errorMsg.classList.add('hidden');
                 unlockSite();
             } else {
